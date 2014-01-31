@@ -1,0 +1,10 @@
+<scxml initial="A" version="0.9" xmlns="http://www.w3.org/2005/07/scxml">
+ <state id="A">
+	  <transition cond="true" event="Transicion_AB" target="B"></transition>
+ </state>
+ <state id="B">
+	<transition cond="true" event="Transicion_BC" target="C"></transition>
+ </state>
+ <final id="C">
+ </final>
+</scxml>
