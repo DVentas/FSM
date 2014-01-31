@@ -5,7 +5,13 @@ import org.apache.commons.scxml.model.Action;
 
 public class fsmMain {
 	
-	static FSM fsm = new FSM();
+	/**
+	 * State Machine uses this scmxml config file
+	 */
+	private static final String SCXML_CONFIG_STATUS = "fsm.scxml";
+
+	
+	static FSM fsm = new FSM(FSM.class.getClassLoader().getResource(SCXML_CONFIG_STATUS));
 	
 	public static final String STATE_A = "A";
 	public static final String STATE_B = "B";

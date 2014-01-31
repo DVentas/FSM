@@ -1,5 +1,6 @@
 package com.autentia.tutorials.fsm;
 
+import java.net.URL;
 import java.util.List;
 
 import org.apache.commons.scxml.env.AbstractStateMachine;
@@ -11,16 +12,12 @@ import org.apache.commons.scxml.model.Transition;
 
 
 public class FSM extends AbstractStateMachine{
-	
-	/**
-	  * State Machine uses this scmxml config file
-	  */
-	 private static final String SCXML_CONFIG_STATUS = "fsm.scxml";
 	 
 	 // Constructor
-	 public FSM() {
-		   super(FSM.class.getClassLoader().getResource(SCXML_CONFIG_STATUS));
+	 public FSM(URL xmlPath) {
+		   super(xmlPath);
 	 }
+	 
 	 // A–ade una accion a una transaccion de un estado (stateName) y nombre del evento que la lanza (event)
 	 public void addActionToTransitionByStateAndEvent(String stateName, String event, Action action){
 		 State state = getState(stateName);
