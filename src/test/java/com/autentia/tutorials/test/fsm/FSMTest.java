@@ -1,4 +1,4 @@
-package fsm;
+package com.autentia.tutorials.test.fsm;
 
 import org.apache.commons.scxml.TriggerEvent;
 import org.apache.commons.scxml.model.Action;
