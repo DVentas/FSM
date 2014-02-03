@@ -1,15 +1,21 @@
 package com.autentia.tutorials.test.fsm;
 
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import java.net.URL;
+import java.util.Collection;
 
+import org.apache.commons.scxml.ErrorReporter;
+import org.apache.commons.scxml.EventDispatcher;
+import org.apache.commons.scxml.SCInstance;
 import org.apache.commons.scxml.TriggerEvent;
 import org.apache.commons.scxml.model.Action;
-import org.apache.commons.scxml.model.State;
+import org.apache.commons.logging.Log;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 import com.autentia.tutorials.fsm.CustomAction;
 import com.autentia.tutorials.fsm.FSM;
@@ -25,21 +31,37 @@ public class FSMTest {
 	
 	public static final URL urlXML = FSM.class.getClassLoader().getResource("fsm.scxml");
 	
+	public static TriggerEvent transicionAB = null;
+	public static TriggerEvent transicionBC = null;
+	
+	public static boolean eventdata;
+	
+	private static Action actionTransitionCB1;
+	private static Action actionTransitionCB2;
+	
+	private static CustomAction actionEntryB;
+	private static CustomAction actionExitB1;
+	private static CustomAction actionExitB2;
+	private static CustomAction actionEntryC;
+	
 	public static FSM fsm = null;
 	
-
-		@BeforeClass
-		public static void initMocks() {
-			fsm = spy(new FSM(urlXML));
-		}
 	
-		@Test
-		public void init(){
-			Action [] actionOnEntryB = {new CustomAction("Action onEntry B")};
-			Action [] actionOnExitB = {new CustomAction("Action onExit B1"), new CustomAction("Action onExit B2")};
-			Action [] actionOnEntryC = {new CustomAction("Action onEntry C")};
-			Action actionTransitionCB1 = new CustomAction("Action Transition CB1");
-			Action actionTransitionCB2 = new CustomAction("Action Transition CB2");
+		@BeforeClass
+		public static void init(){
+			fsm = spy(new FSM(urlXML));
+			
+			actionEntryB = spy(new CustomAction("Action onEntry B"));
+			actionExitB1 = spy(new CustomAction("Action onExit B1"));
+			actionExitB2 = spy(new CustomAction("Action onExit B2"));
+			actionEntryC = spy(new CustomAction("Action onEntry C"));
+			
+			Action [] actionOnEntryB = {actionEntryB};
+			Action [] actionOnExitB = {actionExitB1, actionExitB2};
+			Action [] actionOnEntryC = {actionEntryC};
+			
+			actionTransitionCB1 = spy(new CustomAction("Action Transition CB1"));
+			actionTransitionCB2 = spy(new CustomAction("Action Transition CB2"));
 			
 			fsm.setActionInOnEntryByState(STATE_B, actionOnEntryB);
 			fsm.setActionInOnExitByState(STATE_B, actionOnExitB);
@@ -49,34 +71,60 @@ public class FSMTest {
 			fsm.addActionToTransitionByStateAndEvent(STATE_B, TRANSITION_BC , actionTransitionCB1);
 			fsm.addActionToTransitionByStateAndEvent(STATE_B, TRANSITION_BC , actionTransitionCB2);
 			
+			eventdata = true;
+			
 			fsm.addConditionToTransitionByStateAndEvent(STATE_B, TRANSITION_BC, "_eventdata");
 			
-			boolean eventdata = true;
+			transicionAB = new TriggerEvent(TRANSITION_AB,TriggerEvent.SIGNAL_EVENT, eventdata);
+			transicionBC = new TriggerEvent(TRANSITION_BC,TriggerEvent.SIGNAL_EVENT,eventdata);
+			
+		}
+		
+		@Test
+		public void shouldCallOnEntryAndOnExitInOrder(){
+			
 			try {
-				TriggerEvent transicionAB = new TriggerEvent(TRANSITION_AB,TriggerEvent.SIGNAL_EVENT, eventdata);
+				
+				InOrder inOrder = Mockito.inOrder(actionEntryB,actionExitB1,actionExitB2,actionEntryC);
+
+				fsm.getEngine().triggerEvent(transicionAB);
+				fsm.getEngine().triggerEvent(transicionBC);
+
+				inOrder.verify(actionEntryB, Mockito.atLeastOnce()).execute(Matchers.any(EventDispatcher.class), Matchers.any(ErrorReporter.class), Matchers.any(SCInstance.class), Matchers.any(Log.class), Matchers.any(Collection.class));
+				inOrder.verify(actionExitB1, Mockito.atLeastOnce()).execute(Matchers.any(EventDispatcher.class), Matchers.any(ErrorReporter.class), Matchers.any(SCInstance.class), Matchers.any(Log.class), Matchers.any(Collection.class));
+				inOrder.verify(actionExitB2, Mockito.atLeastOnce()).execute(Matchers.any(EventDispatcher.class), Matchers.any(ErrorReporter.class), Matchers.any(SCInstance.class), Matchers.any(Log.class), Matchers.any(Collection.class));
+				inOrder.verify(actionEntryC, Mockito.atLeastOnce()).execute(Matchers.any(EventDispatcher.class), Matchers.any(ErrorReporter.class), Matchers.any(SCInstance.class), Matchers.any(Log.class), Matchers.any(Collection.class));
+				
+			} catch (Exception e) {
+				System.err.println("Error");
+				e.printStackTrace();
+			}
+		}
+		
+		@Test
+		public void shoulGetTransitions(){
+			assert(fsm.getTransitionsByStateAndEvent("A", TRANSITION_AB) == transicionAB);
+			assert(fsm.getTransitionsByStateAndEvent("B", TRANSITION_BC) == transicionBC);
+		}
+		
+		@Test
+		public void shouldCallActionsInOrderInTransitionsCB(){
+	
+			InOrder inOrder = Mockito.inOrder(actionTransitionCB1, actionTransitionCB2);
+			
+			try {
 				
 				fsm.getEngine().triggerEvent(transicionAB);
 				
-				TriggerEvent transicionBC = new TriggerEvent(TRANSITION_BC,TriggerEvent.SIGNAL_EVENT,eventdata);
-				
 				fsm.getEngine().triggerEvent(transicionBC);
 				
+				inOrder.verify(actionTransitionCB1, Mockito.atLeastOnce()).execute(Matchers.any(EventDispatcher.class), Matchers.any(ErrorReporter.class), Matchers.any(SCInstance.class), Matchers.any(Log.class), Matchers.any(Collection.class));
+				inOrder.verify(actionTransitionCB2, Mockito.atLeastOnce()).execute(Matchers.any(EventDispatcher.class), Matchers.any(ErrorReporter.class), Matchers.any(SCInstance.class), Matchers.any(Log.class), Matchers.any(Collection.class));
+				
 			} catch (Exception e) {
+				System.err.println("Error");
 				e.printStackTrace();
 			}
-			
-			
-//			State a = fsm.getState("A");
-//			State b = fsm.getState("B");
-//			State c = fsm.getState("C");
-
-			
-			verify(fsm).getState("B").getOnExit();
-			verify(fsm).getState("B").getOnExit();
-
-			verify(fsm).getState("C").getOnEntry();
-
-		
 		}
 		
 		@Test
@@ -84,17 +132,13 @@ public class FSMTest {
 			
 			fsm.addConditionToTransitionByStateAndEvent(STATE_B, TRANSITION_BC, "_eventdata");
 			
-			boolean eventdata = true;
 			try {
 				
 				assert(fsm.getEngine().getCurrentStatus().equals("A"));
-				TriggerEvent transicionAB = new TriggerEvent(TRANSITION_AB,TriggerEvent.SIGNAL_EVENT, eventdata);
 				fsm.getEngine().triggerEvent(transicionAB);
 			
 				assert(fsm.getEngine().getCurrentStatus().equals("B"));
 	
-				TriggerEvent transicionBC = new TriggerEvent(TRANSITION_BC,TriggerEvent.SIGNAL_EVENT,eventdata);
-				
 				fsm.getEngine().triggerEvent(transicionBC);
 				assert(fsm.getEngine().getCurrentStatus().equals("C"));
 				
@@ -104,12 +148,4 @@ public class FSMTest {
 		
 		}
 
-	//	@Test
-		public void test(){
-			
-			verify(fsm).A();
-			verify(fsm).B();
-			verify(fsm).C();
-			
-		}
 }

@@ -79,6 +79,12 @@ public class FSM extends AbstractStateMachine{
 	 	 }
 		 setTransitionInState(stateName, t);
 	 }
+	 // Devuelve la lista de transacciones de un estado stateName que tienen como evento eventName
+	 public List<Transition> getTransitionsByStateAndEvent(String stateName, String eventName){
+		 State s = getState(stateName);
+		 return  s.getTransitionsList(eventName);
+		 
+	 }
 	 // Callback del estado A, es llamado cuando entra en este estado
 	 public void A() {
 		 System.out.println("STATE: A");
