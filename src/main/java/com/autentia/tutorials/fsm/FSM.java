@@ -3,6 +3,8 @@ package com.autentia.tutorials.fsm;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.scxml.env.AbstractStateMachine;
 import org.apache.commons.scxml.model.Action;
 import org.apache.commons.scxml.model.OnEntry;
@@ -12,6 +14,8 @@ import org.apache.commons.scxml.model.Transition;
 
 
 public class FSM extends AbstractStateMachine{
+	
+	private static final Log LOGGER = LogFactory.getLog(FSM.class);
 	 
 	 // Constructor
 	 public FSM(URL xmlPath) {
@@ -87,15 +91,15 @@ public class FSM extends AbstractStateMachine{
 	 }
 	 // Callback del estado A, es llamado cuando entra en este estado
 	 public void A() {
-		 System.out.println("STATE: A");
+		 LOGGER.info("STATE: A");
 	  }
 	// Callback del estado B
 	 public void B() {
-	     System.out.println("STATE: B");
+		 LOGGER.info("STATE: B");
 	 }
 	// Callback del estado C
 	 public void C() {
-	     System.out.println("STATE: C");
+		 LOGGER.info("STATE: C");
 	 }
 	  
 }
