@@ -1,7 +1,5 @@
 package com.autentia.tutorials.test.fsm;
 
-import static org.mockito.Mockito.spy;
-
 import java.net.URL;
 import java.util.Collection;
 
@@ -16,6 +14,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.spy;
 
 import com.autentia.tutorials.fsm.CustomAction;
 import com.autentia.tutorials.fsm.FSM;
@@ -145,7 +144,5 @@ public class FSMTest {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		
 		}
-
 }

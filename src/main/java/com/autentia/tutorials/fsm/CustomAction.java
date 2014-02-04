@@ -34,7 +34,5 @@ public class CustomAction extends Action{
 	public void setAction(String action){
 		this.action = action;
 	}
-	
-	
 
 }
